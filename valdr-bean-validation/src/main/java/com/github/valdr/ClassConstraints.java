@@ -8,20 +8,21 @@ import java.util.Set;
  * Maps field name to constraints (Bean Validation annotations).
  */
 public class ClassConstraints implements MinimalMap<FieldConstraints> {
-  private final Map<String, FieldConstraints> map = new HashMap<>();
 
-  @Override
-  public Set<Map.Entry<String, FieldConstraints>> entrySet() {
-    return map.entrySet();
-  }
+    private final Map<String, FieldConstraints> map = new HashMap<>();
 
-  @Override
-  public FieldConstraints put(String key, FieldConstraints value) {
-    return map.put(key, value);
-  }
+    @Override
+    public Set<Map.Entry<String, FieldConstraints>> entrySet() {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 
-  @Override
-  public int size() {
-    return map.size();
-  }
+    @Override
+    public FieldConstraints put(String key, FieldConstraints value) {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 }

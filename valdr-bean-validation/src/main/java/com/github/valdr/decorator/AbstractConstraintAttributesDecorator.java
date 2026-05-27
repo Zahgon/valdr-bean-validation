@@ -11,25 +11,25 @@ import lombok.Getter;
  */
 public abstract class AbstractConstraintAttributesDecorator implements MinimalObjectMap {
 
-  @Getter(AccessLevel.PROTECTED)
-  private final ConstraintAttributes decoratee;
+    @Getter(AccessLevel.PROTECTED)
+    private final ConstraintAttributes decoratee;
 
-  /**
-   * Constructor that accepts the decoratee which is wrapped by this decorator.
-   *
-   * @param decoratee wrapped {@link ConstraintAttributes}
-   */
-  public AbstractConstraintAttributesDecorator(ConstraintAttributes decoratee) {
-    this.decoratee = decoratee;
-  }
+    /**
+     * Constructor that accepts the decoratee which is wrapped by this decorator.
+     *
+     * @param decoratee wrapped {@link ConstraintAttributes}
+     */
+    public AbstractConstraintAttributesDecorator(ConstraintAttributes decoratee) {
+        this.decoratee = decoratee;
+    }
 
-  @Override
-  public Object put(String key, Object value) {
-    return decoratee.put(key, value);
-  }
+    @Override
+    public Object put(String key, Object value) {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 
-  @Override
-  public int size() {
-    return decoratee.size();
-  }
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 }

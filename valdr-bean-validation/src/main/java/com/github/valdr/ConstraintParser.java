@@ -8,7 +8,6 @@ import com.google.common.collect.Iterables;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -26,72 +25,59 @@ import java.util.Objects;
  * @see Options
  */
 public class ConstraintParser {
-  private final Logger logger = LoggerFactory.getLogger(ConstraintParser.class);
 
-  private final ClasspathScanner classpathScanner;
-  private final Iterable<Class<? extends Annotation>> allRelevantAnnotationClasses;
-  private final Options options;
+    private final Logger logger = LoggerFactory.getLogger(ConstraintParser.class);
 
-  /**
-   * Constructor.
-   *
-   * @param options the only relevant input for the parser is this configuration
-   */
-  public ConstraintParser(Options options) {
-    this.options = options;
-    this.classpathScanner = new ClasspathScanner(options);
-    allRelevantAnnotationClasses = Iterables.concat(BuiltInConstraint.getAllBeanValidationAnnotations(),
-      getConfiguredCustomAnnotations());
-  }
+    private final ClasspathScanner classpathScanner;
 
-  /**
-   * Based on the configuration passed to the constructor model classes are parsed for constraints.
-   *
-   * @return JSON string for <a href="https://github.com/netceteragroup/valdr">valdr</a>
-   */
-  public String parse() {
-    Map<String, ClassConstraints> classNameToValidationRulesMap = new HashMap<>();
+    private final Iterable<Class<? extends Annotation>> allRelevantAnnotationClasses;
 
-    for (Class clazz : classpathScanner.findClassesToParse()) {
-      if (clazz != null) {
-        ClassConstraints classValidationRules = new AnnotatedClass(clazz, options.getExcludedFields(),
-          allRelevantAnnotationClasses).extractValidationRules();
-        if (classValidationRules.size() > 0) {
-          String name = options.getOutputFullTypeName() ? clazz.getName() : clazz.getSimpleName();
-          classNameToValidationRulesMap.put(name, classValidationRules);
-        }
-      }
+    private final Options options;
+
+    /**
+     * Constructor.
+     *
+     * @param options the only relevant input for the parser is this configuration
+     */
+    public ConstraintParser(Options options) {
+        this.options = options;
+        this.classpathScanner = new ClasspathScanner(options);
+        allRelevantAnnotationClasses = Iterables.concat(BuiltInConstraint.getAllBeanValidationAnnotations(), getConfiguredCustomAnnotations());
     }
 
-    return toJson(classNameToValidationRulesMap);
-  }
+    /**
+     * Based on the configuration passed to the constructor model classes are parsed for constraints.
+     *
+     * @return JSON string for <a href="https://github.com/netceteragroup/valdr">valdr</a>
+     */
+    public String parse() {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 
-  @SneakyThrows(IOException.class)
-  private String toJson(Map<String, ClassConstraints> classNameToValidationRulesMap) {
-    ObjectMapper objectMapper = new ObjectMapper();
+    @SneakyThrows(IOException.class)
+    private String toJson(Map<String, ClassConstraints> classNameToValidationRulesMap) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(MinimalMap.class, new MinimalMapSerializer());
+        objectMapper.registerModule(module);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        return ow.writeValueAsString(classNameToValidationRulesMap);
+    }
 
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(MinimalMap.class, new MinimalMapSerializer());
-    objectMapper.registerModule(module);
-
-    ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-    return ow.writeValueAsString(classNameToValidationRulesMap);
-  }
-
-  @SuppressWarnings("unchecked")
-  private Iterable<? extends Class<? extends Annotation>> getConfiguredCustomAnnotations() {
-    return options.getCustomAnnotationClasses().stream().map(className -> {
-      try {
-        Class<?> validatorClass = Class.forName(className);
-        if (!validatorClass.isAnnotation()) {
-          logger.warn("The configured custom annotation class '{}' is not an annotation. It will be ignored.", validatorClass);
-        } else {
-          return (Class<? extends Annotation>) validatorClass;
-        }
-      } catch (ClassNotFoundException e) {
-        logger.warn("The configured class '{}' can not be found. It will be ignored.", className);
-      }
-      return null;
-    }).filter(Objects::nonNull).toList();
-  }
+    @SuppressWarnings("unchecked")
+    private Iterable<? extends Class<? extends Annotation>> getConfiguredCustomAnnotations() {
+        return options.getCustomAnnotationClasses().stream().map(className -> {
+            try {
+                Class<?> validatorClass = Class.forName(className);
+                if (!validatorClass.isAnnotation()) {
+                    logger.warn("The configured custom annotation class '{}' is not an annotation. It will be ignored.", validatorClass);
+                } else {
+                    return (Class<? extends Annotation>) validatorClass;
+                }
+            } catch (ClassNotFoundException e) {
+                logger.warn("The configured class '{}' can not be found. It will be ignored.", className);
+            }
+            return null;
+        }).filter(Objects::nonNull).toList();
+    }
 }

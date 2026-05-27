@@ -5,7 +5,6 @@ import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-
 import java.util.ListIterator;
 
 /**
@@ -14,24 +13,17 @@ import java.util.ListIterator;
  * to find out if such a swallowed error did in fact occur.
  */
 public class GracefulCliParser extends BasicParser {
-  @Getter
-  private boolean incomplete;
 
-  @Override
-  protected void checkRequiredOptions() {
-    try {
-      super.checkRequiredOptions();
-    } catch (MissingOptionException e) {
-      incomplete = true;
-    }
-  }
+    @Getter
+    private boolean incomplete;
 
-  @Override
-  public void processArgs(Option opt, ListIterator iter) {
-    try {
-      super.processArgs(opt, iter);
-    } catch (ParseException e) {
-      incomplete = true;
+    @Override
+    protected void checkRequiredOptions() {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-  }
+
+    @Override
+    public void processArgs(Option opt, ListIterator iter) {
+        throw new UnsupportedOperationException("STUB: not implemented");
+    }
 }

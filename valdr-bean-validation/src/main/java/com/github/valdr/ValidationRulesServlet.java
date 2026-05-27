@@ -1,12 +1,10 @@
 package com.github.valdr;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -33,114 +31,103 @@ import java.io.PrintWriter;
  * @see Options
  */
 public class ValidationRulesServlet extends HttpServlet {
-  /**
-   * Logger for ValidationRulesServlet.
-   */
-  private final Logger logger = LoggerFactory.getLogger(ValidationRulesServlet.class);
-  /**
-   * Indicates that there are not errors in the configuration.
-   */
-  private boolean correctlyConfigured = false;
-  /**
-   * CORS allow origin pattern.
-   */
-  private String corsAllowOriginPattern;
-  /**
-   * Holds info about reason for the invalid configuration.
-   */
-  private String invalidConfigurationMessage;
-  /**
-   * Constraint parser.
-   */
-  private ConstraintParser parser;
 
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
+    /**
+     * Logger for ValidationRulesServlet.
+     */
+    private final Logger logger = LoggerFactory.getLogger(ValidationRulesServlet.class);
 
-    Options options = loadOptions();
-    invalidConfigurationMessage = validate(options);
-    correctlyConfigured = StringUtils.isEmpty(invalidConfigurationMessage);
-    corsAllowOriginPattern = options.getCorsAllowOriginPattern();
+    /**
+     * Indicates that there are not errors in the configuration.
+     */
+    private boolean correctlyConfigured = false;
 
-    parser = new ConstraintParser(options);
+    /**
+     * CORS allow origin pattern.
+     */
+    private String corsAllowOriginPattern;
 
-    logConfigurationStatus();
-    logCorsStatus();
-  }
+    /**
+     * Holds info about reason for the invalid configuration.
+     */
+    private String invalidConfigurationMessage;
 
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    if (correctlyConfigured) {
-      String json = parser.parse();
-      returnJson(response, json);
-    } else {
-      sendErrorInvalidConfiguration(response);
+    /**
+     * Constraint parser.
+     */
+    private ConstraintParser parser;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-  }
 
-  private Options loadOptions() {
-    InputStream inputStream = null;
-    String configFile = getInitParameter("configFile");
-    try {
-      if (StringUtils.isEmpty(configFile)) {
-        logger.info("Building parser configuration from default file path. Looking for '{}' in classpath.",
-          "/" + Options.CONFIG_FILE_NAME);
-        inputStream = ValidationRulesServlet.class.getResourceAsStream("/" + Options.CONFIG_FILE_NAME);
-      } else {
-        logger.info("Building parser configuration from configured file path '{}'.", configFile);
-        inputStream = new FileInputStream(new File(configFile));
-      }
-      return new ObjectMapper().readValue(inputStream, Options.class);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Cannot read config file.", e);
-    } finally {
-      IOUtils.closeQuietly(inputStream);
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        throw new UnsupportedOperationException("STUB: not implemented");
     }
-  }
 
-  private String validate(Options options) {
-    String validationMsg = StringUtils.EMPTY;
-    try {
-      options.validate();
-    } catch (Options.InvalidConfigurationException e) {
-      validationMsg = "Invalid configuration: " + e.getMessage();
+    private Options loadOptions() {
+        InputStream inputStream = null;
+        String configFile = getInitParameter("configFile");
+        try {
+            if (StringUtils.isEmpty(configFile)) {
+                logger.info("Building parser configuration from default file path. Looking for '{}' in classpath.", "/" + Options.CONFIG_FILE_NAME);
+                inputStream = ValidationRulesServlet.class.getResourceAsStream("/" + Options.CONFIG_FILE_NAME);
+            } else {
+                logger.info("Building parser configuration from configured file path '{}'.", configFile);
+                inputStream = new FileInputStream(new File(configFile));
+            }
+            return new ObjectMapper().readValue(inputStream, Options.class);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot read config file.", e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
     }
-    return validationMsg;
-  }
 
-  private void logConfigurationStatus() {
-    if (correctlyConfigured) {
-      logger.info("The Servlet appears to be correctly configured.");
-    } else {
-      logger.warn(invalidConfigurationMessage);
+    private String validate(Options options) {
+        String validationMsg = StringUtils.EMPTY;
+        try {
+            options.validate();
+        } catch (Options.InvalidConfigurationException e) {
+            validationMsg = "Invalid configuration: " + e.getMessage();
+        }
+        return validationMsg;
     }
-  }
 
-  private void logCorsStatus() {
-    String logMsg = "Configured CORS allow-origin pattern is '{}'.";
-    if (StringUtils.isEmpty(corsAllowOriginPattern)) {
-      logMsg += " Therefore, not using CORS.";
+    private void logConfigurationStatus() {
+        if (correctlyConfigured) {
+            logger.info("The Servlet appears to be correctly configured.");
+        } else {
+            logger.warn(invalidConfigurationMessage);
+        }
     }
-    logger.info(logMsg, corsAllowOriginPattern);
-  }
 
-  private void sendErrorInvalidConfiguration(HttpServletResponse response) throws IOException {
-    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, invalidConfigurationMessage);
-  }
-
-  private void returnJson(HttpServletResponse response, String json) throws IOException {
-    setCorsHeader(response);
-    response.setContentType("application/json;charset=UTF-8");
-    response.setContentLength(json.getBytes("utf-8").length);
-    PrintWriter writer = response.getWriter();
-    writer.write(json);
-    writer.close();
-  }
-
-  private void setCorsHeader(HttpServletResponse response) {
-    if (StringUtils.isNotEmpty(corsAllowOriginPattern)) {
-      response.setHeader("Access-Control-Allow-Origin", corsAllowOriginPattern);
+    private void logCorsStatus() {
+        String logMsg = "Configured CORS allow-origin pattern is '{}'.";
+        if (StringUtils.isEmpty(corsAllowOriginPattern)) {
+            logMsg += " Therefore, not using CORS.";
+        }
+        logger.info(logMsg, corsAllowOriginPattern);
     }
-  }
+
+    private void sendErrorInvalidConfiguration(HttpServletResponse response) throws IOException {
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, invalidConfigurationMessage);
+    }
+
+    private void returnJson(HttpServletResponse response, String json) throws IOException {
+        setCorsHeader(response);
+        response.setContentType("application/json;charset=UTF-8");
+        response.setContentLength(json.getBytes("utf-8").length);
+        PrintWriter writer = response.getWriter();
+        writer.write(json);
+        writer.close();
+    }
+
+    private void setCorsHeader(HttpServletResponse response) {
+        if (StringUtils.isNotEmpty(corsAllowOriginPattern)) {
+            response.setHeader("Access-Control-Allow-Origin", corsAllowOriginPattern);
+        }
+    }
 }
